@@ -11,10 +11,10 @@
 <body>
     <main>
         <h1>Cadastro de Diarista</h1>
-        <form method="post" th:object="${diarista}">
+        <form method="POST" th:object="${diarista}">
             <div class="mb-3">
                 <label class="form-label" for="nomeCompleto">Nome Completo</label>
-                <input class="form-control" type="text" id="nomeCompleto" name="nomeCompleto" th:field="*{nomeCompleto}">
+                <input class="form-control" type="text" th:field="*{nomeCompleto}">
             </div>
             <div class="mb-3">
                 <label class="form-label" for="cpf">CPF</label>
