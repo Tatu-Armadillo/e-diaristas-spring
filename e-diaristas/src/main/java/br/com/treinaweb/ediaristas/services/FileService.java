@@ -1,0 +1,40 @@
+package br.com.treinaweb.ediaristas.services;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+public class FileService {
+
+    private final Path pastaUpload = Paths.get("uploads");
+
+    public String salvar(MultipartFile file) throws IOException {
+        if (!Files.exists(pastaUpload)) {
+            Files.createDirectories(pastaUpload);
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename.split("\\.")[1];
+        String fileName = UUID.randomUUID().toString() + "." + ext;
+    
+        Files.copy(file.getInputStream(), pastaUpload.resolve(fileName));
+
+        return fileName;
+    }
+
+    public Resource carregar(String filename) throws MalformedURLException {
+        Path filePath = pastaUpload.resolve((filename));
+
+        return new UrlResource(filePath.toUri());
+    }
+    
+}
