@@ -1,24 +1,39 @@
 package br.com.treinaweb.ediaristas.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.treinaweb.ediaristas.dtos.DiaristasPagedResponse;
+import br.com.treinaweb.ediaristas.dtos.ViaCepResponse;
 import br.com.treinaweb.ediaristas.models.Diarista;
 import br.com.treinaweb.ediaristas.repositories.DiaristaRepository;
+import br.com.treinaweb.ediaristas.services.ViaCepService;
 
 @RestController
 @RequestMapping("/api/diaristas-cidade")
 public class DiaristaRestController {
-    
+
     @Autowired
     private DiaristaRepository repository;
 
+    @Autowired
+    private ViaCepService viaCepService;
+
     @GetMapping
-    public List<Diarista> buscarDiaristasPorCep() {
-        return repository.findAll();
+    public DiaristasPagedResponse buscarDiaristasPorCep(@RequestParam String cep) {
+        ViaCepResponse endereco = viaCepService.buscarEnderecoPorCep(cep);
+        String codigoIbge = endereco.getIbge();
+
+        PageRequest pageable = PageRequest.of(0, 6);
+        Page<Diarista> diaristas = repository.findByCodigoIbge(codigoIbge, pageable);
+
+        Long quantidadeDiaristas = diaristas.getTotalElements() > 6 ? diaristas.getTotalElements() - 6 : 0;
+
+        return new DiaristasPagedResponse(diaristas.getContent(), quantidadeDiaristas);
     }
 }
