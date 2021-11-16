@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import br.com.treinaweb.ediaristas.dtos.ViaCepResponse;
 import br.com.treinaweb.ediaristas.models.Diarista;
 import br.com.treinaweb.ediaristas.repositories.DiaristaRepository;
 import br.com.treinaweb.ediaristas.services.FileService;
+import br.com.treinaweb.ediaristas.services.ViaCepService;
 
 @Controller
 @RequestMapping("/admin/diaristas")
@@ -29,10 +31,16 @@ public class DiaristaController {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private ViaCepService viaCepService;
+
     @GetMapping
     public ModelAndView listar() {
         ModelAndView modelAndView = new ModelAndView("admin/diaristas/listar");
         modelAndView.addObject("diaristas", repository.findAll());
+
+        var response = viaCepService.buscarEnderecoPorCep("01001000");
+        System.out.println("Teste de resposta da API: " + response);
         return modelAndView;
     }
 
@@ -52,6 +60,11 @@ public class DiaristaController {
 
         String fileName = fileService.salvar(imagem);
         diarista.setFoto(fileName);
+
+        ViaCepResponse endereco = viaCepService.buscarEnderecoPorCep(diarista.getCep());
+        String codigoIbge = endereco.getIbge();
+        diarista.setCodigoIbge(codigoIbge);
+
         repository.save(diarista);
 
         return "redirect:/admin/diaristas";
@@ -78,6 +91,10 @@ public class DiaristaController {
             String fileName = fileService.salvar(imagem);
             diarista.setFoto(fileName);
         }
+
+        ViaCepResponse endereco = viaCepService.buscarEnderecoPorCep(diarista.getCep());
+        String codigoIbge = endereco.getIbge();
+        diarista.setCodigoIbge(codigoIbge);
 
         repository.save(diarista);
         return "redirect:/admin/diaristas";
